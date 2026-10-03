@@ -1,0 +1,224 @@
+{
+  "entities": {
+    "Business": {
+      "title": "Business",
+      "description": "Represents a store/business entity in the CRM.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "businessId": { "type": "string" },
+        "businessName": { "type": "string" },
+        "name": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "workingHours": { "type": "string" },
+        "deliveryZones": { "type": "array" },
+        "deliveryPrice": { "type": "number" },
+        "freeDeliveryThreshold": { "type": "number" },
+        "paymentMethods": { "type": "array" },
+        "currency": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "name", "ownerUid"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile mapping user to their business.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "businessId": { "type": "string" },
+        "businessName": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["userId", "businessId", "businessName", "createdAt"]
+    },
+    "Warehouse": {
+      "title": "Warehouse",
+      "description": "Warehouse belonging to a business.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "active": { "type": "boolean" },
+        "isDefault": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "name", "createdAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Product in inventory catalog.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "warehouseId": { "type": "string" },
+        "name": { "type": "string" },
+        "sku": { "type": "string" },
+        "category": { "type": "string" },
+        "brand": { "type": "string" },
+        "model": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "costPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "lowStockThreshold": { "type": "number" },
+        "imageUrl": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "warehouseId", "name", "sku", "price", "stock", "createdAt", "updatedAt"]
+    },
+    "StockMovement": {
+      "title": "StockMovement",
+      "description": "Audit movement of stock in or out of warehouse.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "warehouseId": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "type": { "type": "string", "enum": ["STOCK_IN", "STOCK_OUT", "SALE", "RETURN", "DAMAGE", "ADJUSTMENT"] },
+        "quantity": { "type": "number" },
+        "reason": { "type": "string" },
+        "referenceId": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["id", "businessId", "warehouseId", "productId", "type", "quantity", "reason", "createdAt", "createdBy"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer in CRM.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "firstName": { "type": "string" },
+        "phone": { "type": "string" },
+        "totalOrders": { "type": "number" },
+        "totalSpent": { "type": "number" },
+        "status": { "type": "string" },
+        "leadScore": { "type": "number" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "firstName"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "Conversation between business and customer.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "channel": { "type": "string" },
+        "telegramChatId": { "type": "string" },
+        "status": { "type": "string" },
+        "lastMessagePreview": { "type": "string" },
+        "lastMessageAt": { "type": "number" },
+        "unreadCount": { "type": "number" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "customerId", "telegramChatId", "status", "createdAt"]
+    },
+    "ConversationMessage": {
+      "title": "ConversationMessage",
+      "description": "Individual message inside a conversation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "conversationId": { "type": "string" },
+        "direction": { "type": "string" },
+        "type": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "customerId", "conversationId", "direction", "type", "text", "createdAt"]
+    },
+    "TelegramUpdateRecord": {
+      "title": "TelegramUpdateRecord",
+      "description": "Idempotency record for Telegram update.",
+      "type": "object",
+      "properties": {
+        "updateId": { "type": "number" },
+        "businessId": { "type": "string" },
+        "processedAt": { "type": "number" }
+      },
+      "required": ["updateId", "businessId", "processedAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order in CRM.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string" },
+        "orderStatus": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "customerId", "total"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user document storing userId, businessId, businessName, createdAt."
+    },
+    "/businesses/{businessId}": {
+      "schema": { "$ref": "#/entities/Business" },
+      "description": "Business root document storing userId, businessId, businessName, createdAt."
+    },
+    "/businesses/{businessId}/warehouses/{warehouseId}": {
+      "schema": { "$ref": "#/entities/Warehouse" },
+      "description": "Warehouses belonging to business."
+    },
+    "/businesses/{businessId}/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Products belonging to business."
+    },
+    "/businesses/{businessId}/stock_movements/{movementId}": {
+      "schema": { "$ref": "#/entities/StockMovement" },
+      "description": "Stock audit movements for business."
+    },
+    "/customers/{customerId}": {
+      "schema": { "$ref": "#/entities/Customer" },
+      "description": "Tenant-isolated customers collection."
+    },
+    "/conversations/{conversationId}": {
+      "schema": { "$ref": "#/entities/Conversation" },
+      "description": "Tenant-isolated conversations collection."
+    },
+    "/conversations/{conversationId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ConversationMessage" },
+      "description": "Messages subcollection inside conversations."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Tenant-isolated orders collection."
+    },
+    "/telegram_updates/{updateId}": {
+      "schema": { "$ref": "#/entities/TelegramUpdateRecord" },
+      "description": "Server-side Telegram update idempotency records."
+    }
+  }
+}

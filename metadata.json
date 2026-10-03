@@ -1,0 +1,6 @@
+{
+  "name": "AI SavdoBot - Telegram Sales Assistant & CRM",
+  "description": "AI-powered Telegram sales assistant, product catalog, warehouse inventory, and lightweight CRM for retail businesses in Uzbekistan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

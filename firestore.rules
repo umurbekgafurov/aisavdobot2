@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // User profile document: private to the user
+    // Contains: userId, businessId, businessName, createdAt, email
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Business document: only accessible by its creator/owner
+    // Contains: userId, businessId, businessName, createdAt, etc.
+    match /businesses/{businessId} {
+      allow create: if isAuthenticated() && (
+        request.resource.data.userId == request.auth.uid ||
+        request.resource.data.ownerUid == request.auth.uid
+      );
+      
+      allow read, update, delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.ownerUid == request.auth.uid
+      );
+
+      // Subcollections belonging to this business (products, warehouses, orders, etc.)
+      match /{collectionName}/{docId} {
+        allow read, write: if isAuthenticated() && (
+          get(/databases/$(database)/documents/businesses/$(businessId)).data.userId == request.auth.uid ||
+          get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid
+        );
+      }
+    }
+
+    function isWorker() {
+      return isAuthenticated() && request.auth.token.email == 'telegram_worker@savdobot.uz';
+    }
+
+    function canAccessBusinessData(bizId) {
+      return isAuthenticated() && (
+        isWorker() ||
+        (bizId != null && (
+          get(/databases/$(database)/documents/businesses/$(bizId)).data.userId == request.auth.uid ||
+          get(/databases/$(database)/documents/businesses/$(bizId)).data.ownerUid == request.auth.uid
+        ))
+      );
+    }
+
+    // Tenant-isolated Customers collection
+    match /customers/{customerId} {
+      allow create: if isWorker() || (isAuthenticated() && canAccessBusinessData(request.resource.data.businessId));
+      allow read, update, delete: if isWorker() || (isAuthenticated() && canAccessBusinessData(resource.data.businessId));
+    }
+
+    // Tenant-isolated Conversations collection & messages subcollection
+    match /conversations/{conversationId} {
+      allow create: if isWorker() || (isAuthenticated() && canAccessBusinessData(request.resource.data.businessId));
+      allow read, update, delete: if isWorker() || (isAuthenticated() && canAccessBusinessData(resource.data.businessId));
+
+      match /messages/{messageId} {
+        allow create: if isWorker() || (isAuthenticated() && canAccessBusinessData(request.resource.data.businessId));
+        allow read, update, delete: if isWorker() || (isAuthenticated() && canAccessBusinessData(resource.data.businessId));
+      }
+    }
+
+    // Tenant-isolated Orders collection
+    match /orders/{orderId} {
+      allow create: if isWorker() || (isAuthenticated() && canAccessBusinessData(request.resource.data.businessId));
+      allow read, update, delete: if isWorker() || (isAuthenticated() && canAccessBusinessData(resource.data.businessId));
+    }
+
+    // Tenant-isolated Pending Confirmations collection (M4.3.1)
+    match /pending_confirmations/{confirmationId} {
+      allow create: if isWorker() || (isAuthenticated() && canAccessBusinessData(request.resource.data.businessId));
+      allow read, update, delete: if isWorker() || (isAuthenticated() && canAccessBusinessData(resource.data.businessId));
+    }
+
+    // System-only Idempotency collection
+    match /telegram_updates/{updateId} {
+      allow read, write: if isWorker();
+    }
+  }
+}
